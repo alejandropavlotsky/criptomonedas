@@ -7,6 +7,7 @@ import {
   Text,
   StatusBar,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import Header from './components/Header';
 import Formulario from './components/Formulario';
@@ -18,18 +19,29 @@ const App = () => {
   const [criptoMoneda, setCriptoMoneda] = useState('');
   const [consultarApi, setConsultarApi] = useState(false);
   const [resultado, setResultado] = useState({});
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     const cotizarCriptomoneda = async () => {
       if (consultarApi) {
         const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptoMoneda}&tsyms=${moneda}`;
         const resultado = await axios.get(url);
-        setResultado(resultado.data.DISPLAY[criptoMoneda][moneda]);
-        setConsultarApi(false);
+        setCargando(true);
+        setTimeout(() => {
+          setResultado(resultado.data.DISPLAY[criptoMoneda][moneda]);
+          setConsultarApi(false);
+          setCargando(false);
+        }, 3000);
       }
     };
     cotizarCriptomoneda();
   }, [consultarApi]);
+
+  const componente = cargando ? (
+    <ActivityIndicator size="large" color="#5e49e2" />
+  ) : (
+    <Cotizacion resultado={resultado} />
+  );
 
   return (
     <>
@@ -48,7 +60,7 @@ const App = () => {
             setConsultarApi={setConsultarApi}
           />
         </View>
-        <Cotizacion resultado={resultado} />
+        <View style={{marginTop: 40}}>{componente}</View>
       </ScrollView>
     </>
   );
